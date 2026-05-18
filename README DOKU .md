@@ -1,116 +1,102 @@
-Reproduction Materials
+causal-shadow-price
 
-Reproduction code and paper for **"The Causal Shadow Price: Identification, Doubly Robust Estimation, and Semiparametric Efficiency for the Lagrange Multiplier of Interventional Fairness Constraints"** (Seyed Yousefi, IT & Science GmbH, 2026).
 
-## Contents
+Reproduction code and paper for "The Causal Shadow Price: Identification, Doubly Robust Estimation, and Semiparametric Efficiency for the Lagrange Multiplier of Interventional Fairness Constraints" by Seyed A. Yousefi, IT and Science GmbH, 2026.
 
-```
-.
-├── README Doku.md
-├── LICENSE
-├── requirements.txt                         # Pinned package versions
-├── .gitignore                               # Standard Python ignores
-├── paper/
-│   ├── v14.tex                              # LaTeX source
-│   └── v14.pdf                              # Compiled paper
-├── synthetic/
-│   ├── synthetic_diagnostic.py              # Section 8: oracle vs AIPW diagnostic
-│   ├── algorithm1_validation.py             # Section 10.2: Algorithm 1 validation (Fig. 1, Fig. 2)
-│   ├── coverage_n2000_sandwich_500reps.py   # Table 2, column n=2000
-│   ├── coverage_n5000_sandwich_500reps.py   # Table 2, column n=5000
-│   ├── coverage_n10000_sandwich_500reps.py  # Table 2, column n=10000
-│   └── make_figures_colab.py                # Generates fig_convergence.pdf and fig_forest.pdf
-├── compas/
-│   ├── compas_step1.ipynb                   # COMPAS adjustment-set diagnostics
-│   └── compas_step2.ipynb                   # COMPAS solver + Sandwich CI (Section 10.3)
-├── figures/
-│   ├── fig_convergence.pdf                  # Figure 1
-│   └── fig_forest.pdf                       # Figure 2
-└── expected_results/                        # JSON snapshots for verification
-    ├── n2000_500reps.json
-    ├── n5000_500reps.json
-    └── n10000_500reps.json
-```
+Paper on Zenodo:
+https://doi.org/10.5281/zenodo.20241478
 
-## Requirements
+
+Contents
+
+    README.md
+    LICENSE
+    requirements.txt
+    synthetic_diagnostic.py     Section 8, oracle vs AIPW diagnostic
+    algorithm1_validation.py    Section 10.2, Algorithm 1 validation, Figures 1 and 2
+    coverage_n2000_sandwich.py  Table 2, column n equals 2000
+    coverage_n10000.py          Table 2, column n equals 10000
+    coverage_sandwich.py        Sandwich variance helpers used by the coverage scripts
+    make_figures_colab.py       Generates fig_convergence.pdf and fig_forest.pdf
+    compas_step2.ipynb          Section 10.3, COMPAS solver and Sandwich CI
+
+
+Requirements
 
 Python 3.9 or later.
 
-```bash
-pip install -r requirements.txt
-```
+Install the dependencies with:
 
-## Reproducing the Paper
+    pip install -r requirements.txt
 
-### Synthetic Experiments (Section 8 and 10.2)
+Direct dependencies are numpy, scipy, scikit-learn, pandas and matplotlib. The notebook also needs jupyter and an internet connection to download the COMPAS dataset.
 
-The synthetic experiments are deterministic given fixed seeds.
 
-```bash
-# Section 8: oracle vs AIPW diagnostic (~5 minutes)
-python synthetic/synthetic_diagnostic.py
+Reproducing the paper
 
-# Section 10.2: Algorithm 1 validation (~15 minutes)
-python synthetic/algorithm1_validation.py
-```
 
-### Coverage Table (Table 2)
+Synthetic experiments, Sections 8 and 10.2
 
-The three coverage scripts each estimate one column of Table 2 with B=500 replications. Seeds 10,000 through 10,499.
+Results are deterministic for fixed seeds.
 
-```bash
-# Run in parallel if cores permit, sequentially otherwise.
-python synthetic/coverage_n2000_sandwich_500reps.py   > log_n2000.txt 2>&1    # ~30-45 min
-python synthetic/coverage_n5000_sandwich_500reps.py   > log_n5000.txt 2>&1    # ~60-90 min
-python synthetic/coverage_n10000_sandwich_500reps.py  > log_n10000.txt 2>&1   # ~120-180 min
-```
+Section 8, oracle vs AIPW diagnostic, about 5 minutes:
 
-Each script writes a JSON result file (e.g. `results_n2000_500reps.json`) and prints intermediate progress every 25 replications.
+    python synthetic_diagnostic.py
 
-### Figures (Figures 1 and 2)
+Section 10.2, Algorithm 1 validation, about 15 minutes:
 
-```bash
-python synthetic/make_figures_colab.py
-```
+    python algorithm1_validation.py
 
-Outputs `fig_convergence.pdf` and `fig_forest.pdf`.
 
-### COMPAS Real-Data Demonstration (Section 10.3)
+Coverage table, Table 2
 
-The COMPAS analysis is split into two notebooks. Run Step 1 first, then Step 2 in the same Colab/Jupyter session.
+Each script estimates one column of Table 2 with 500 replications, using seeds 10000 to 10499. Run in parallel if cores permit, sequentially otherwise.
 
-**Step 1** (`compas_step1.ipynb`): downloads the ProPublica COMPAS cohort from GitHub, applies the standard filter (n=5278), and diagnoses three back-door adjustment-set candidates via cross-fitted propensity. No local data file is needed; the notebook fetches data from:
+    python coverage_n2000_sandwich.py
+    python coverage_n10000.py
 
-```
-https://raw.githubusercontent.com/propublica/compas-analysis/master/compas-scores-two-years.csv
-```
+The run for n equals 2000 takes about 30 to 45 minutes. The run for n equals 10000 takes about 120 to 180 minutes. Each script writes a JSON result file and prints progress every 25 replications.
 
-**Step 2** (`compas_step2.ipynb`): runs the AIPW-corrected primal-dual solver, computes Sandwich CIs for the shadow price `mu_bar`, and verifies activity at the unconstrained model. Depends on the variables `df`, `RESULTS`, `CANDIDATES` defined in Step 1.
+
+Figures, Figures 1 and 2
+
+    python make_figures_colab.py
+
+Outputs fig_convergence.pdf and fig_forest.pdf.
+
+
+COMPAS real data demonstration, Section 10.3
+
+compas_step2.ipynb runs the AIPW corrected primal dual solver on the ProPublica COMPAS cohort, n equals 5278 after the standard filter. It computes Sandwich confidence intervals for the shadow price mu_bar and verifies that the constraint is active at the unconstrained model.
+
+Data is fetched directly from:
+
+    https://raw.githubusercontent.com/propublica/compas-analysis/master/compas-scores-two-years.csv
 
 Expected output:
-- `mu_bar = 0.7217` under specification A (minimal: age, priors)
-- `mu_bar = 0.7214` under specification B (comprehensive)
-- 95% Sandwich CI: approximately [0.671, 0.772] under both specifications
-- Race coefficient exactly halved: 0.4969 (unconstrained) -> 0.2484 (constrained), matching the theoretical prediction `epsilon / |g_A| = 0.099 / 0.398 = 0.2487`
-- Activity verification: |D| at theta_unc = 0.198, 14 standard errors above epsilon = 0.099
 
-## Citation
+    mu_bar equals 0.7217 under specification A, the minimal adjustment set with age and priors.
+    mu_bar equals 0.7214 under specification B, the comprehensive adjustment set.
+    The 95 percent Sandwich confidence interval is roughly 0.671 to 0.772 in both specifications.
+    The race coefficient is halved, 0.4969 unconstrained becomes 0.2484 constrained, matching the theoretical prediction epsilon divided by absolute value of g_A, that is 0.099 divided by 0.398 equals 0.2487.
+    Activity check: absolute value of D at theta_unc is 0.198, which is 14 standard errors above epsilon equals 0.099.
 
-```bibtex
-@article{yousefi2026causalshadowprice,
-  title  = {The Causal Shadow Price: Identification, Doubly Robust Estimation,
-            and Semiparametric Efficiency for the Lagrange Multiplier of
-            Interventional Fairness Constraints},
-  author = {Yousefi, Seyed},
-  year   = {2026},
-  note   = {IT \& Science GmbH, Switzerland}
-}
-```
 
-## License
+Citation
 
-Code: MIT (see `LICENSE`). Paper: All rights reserved by the author.
+Yousefi, Seyed A. (2026). The Causal Shadow Price: Identification, Doubly Robust Estimation, and Semiparametric Efficiency for the Lagrange Multiplier of Interventional Fairness Constraints. IT and Science GmbH, Switzerland. Preprint. DOI 10.5281/zenodo.20241478.
 
-## Contact
 
-Open an issue on this repository for reproduction questions or bug reports.
+License
+
+Code is MIT, see the LICENSE file. The paper is licensed CC-BY-4.0 on Zenodo.
+
+
+Status
+
+Preprint, currently under peer review.
+
+
+Contact
+
+Open an issue on this repository.
