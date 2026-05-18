@@ -1,4 +1,4 @@
-# Causal Shadow Price: Reproduction Materials
+Reproduction Materials
 
 Reproduction code and paper for **"The Causal Shadow Price: Identification, Doubly Robust Estimation, and Semiparametric Efficiency for the Lagrange Multiplier of Interventional Fairness Constraints"** (Seyed Yousefi, IT & Science GmbH, 2026).
 
@@ -6,7 +6,7 @@ Reproduction code and paper for **"The Causal Shadow Price: Identification, Doub
 
 ```
 .
-├── README.md
+├── README Doku.md
 ├── LICENSE
 ├── requirements.txt                         # Pinned package versions
 ├── .gitignore                               # Standard Python ignores
